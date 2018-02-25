@@ -1,0 +1,24 @@
+---
+- name: Sample IAC config
+  hosts: SE
+  connection: local
+  gather_facts: True
+  vars_files:
+    - var_files/customer_list.yml
+
+  tasks:
+
+    - name: configure 5311
+      ios_config:
+        host: "{{inventory_hostname}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        src: "templates/5311.j2"
+      with_items: "{{customer_list}}" 
+    - name: configure 5611
+      ios_config:
+        host: "{{inventory_hostname}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        src: "templates/5611.j2"
+      with_items: "{{customer_list}}"
