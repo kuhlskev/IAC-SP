@@ -1,0 +1,8 @@
+customer_list:
+  - neighbor: 100.50.21.0
+    vrf: Customer_A
+    rt: 200:100
+    5311_desc: 'to CPE-01'
+    5311_subnet: 192.168.1.0/24
+    5611_desc: 'to CPE-02'
+    5611_subnet: 192.168.2.0/24

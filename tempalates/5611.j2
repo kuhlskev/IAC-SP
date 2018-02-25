@@ -1,0 +1,29 @@
+router bgp 200
+!
+address-family vpnv4 unicast
+!
+neighbor {{neighbor}}
+ address-family vpnv4 unicast
+
+ vrf {{vrf}}
+ address-family ipv4 unicast
+  import route-target
+   {{rt}}
+  !
+  export route-target
+   {{rt}}
+  !
+!
+!
+interface GigabitEthernet0/0/0/1
+ description {{5611_desc}}
+ vrf {{vrf}}
+ ipv4 address "{{ 5611_subnet | ipaddr('1') | ipaddr('address') }}" "{{ 5611_subnet | ipaddr('netmask') }}"
+!
+!
+router bgp 200
+ vrf {{vrf}}
+  {{rt}}
+  address-family ipv4 unicast
+   redistribute connected
+  !

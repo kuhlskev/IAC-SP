@@ -1,22 +1,22 @@
 [all:vars]
 ansible_connection = local
-username = admin
-password = admin
+username = cisco
+password = cisco
 transport = ssh
 
 [PE]
-PE-01
-PE-02
+PE-01 ansible_host=
+PE-02 ansible_host=
 
 [SE]
-SE-5311
-SE-5611
+SE-5311 ansible_host=
+SE-5611 ansible_host=
 
 [RR]
-T-RR-01
-S-RR-01
+T-RR-01 ansible_host=
+S-RR-01 ansible_host=
 
 [Core]
-CR-01
-CR-02
-CR-03
+CR-01 ansible_host=
+CR-02 ansible_host=
+CR-03 ansible_host=
