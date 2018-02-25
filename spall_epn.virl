@@ -1,0 +1,1392 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<topology xmlns="http://www.cisco.com/VIRL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="0.95" xsi:schemaLocation="http://www.cisco.com/VIRL https://raw.github.com/CiscoVIRL/schema/v0.95/virl.xsd">
+    <extensions>
+        <entry key="management_network" type="String">exclusive</entry>
+        <entry key="AutoNetkit.enable_cdp" type="Boolean">true</entry>
+        <entry key="AutoNetkit.address_family" type="String">dual_stack</entry>
+    </extensions>
+    <node name="SE-5311" type="SIMPLE" subtype="IOS XRv" location="53,234">
+        <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
+            <entry key="config" type="String">!! IOS XR Configuration 6.1.3
+!! Last configuration change at Tue Dec  5 22:00:36 2017 by cisco
+!
+!  IOS-XR Config generated on 2017-11-08 13:47
+! by autonetkit_0.23.5
+hostname SE-5311
+service timestamps log datetime msec
+service timestamps debug datetime msec
+telnet vrf default ipv4 server max-servers 10
+telnet vrf Mgmt-intf ipv4 server max-servers 10
+domain name virl.info
+domain lookup disable
+cdp
+vrf Mgmt-intf
+ address-family ipv4 unicast
+ !
+ address-family ipv6 unicast
+ !
+!
+vrf Customer_A
+ address-family ipv4 unicast
+  import route-target
+   200:100
+  !
+  export route-target
+   200:100
+  !
+ !
+!
+line template vty
+ timestamp
+ exec-timeout 720 0
+!
+line console
+ exec-timeout 0 0
+!
+line default
+ exec-timeout 720 0
+!
+vty-pool default 0 50
+control-plane
+ management-plane
+  inband
+   interface all
+    allow all
+   !
+  !
+ !
+!
+interface Loopback53
+ ipv4 address 100.53.11.0 255.255.255.255
+!
+interface Loopback100
+ vrf Customer_A
+ ipv4 address 192.168.100.1 255.255.255.0
+!
+interface MgmtEth0/0/CPU0/0
+ description OOB Management
+ cdp
+ ! Configured on launch
+ vrf Mgmt-intf
+ ipv4 address 10.255.0.9 255.255.0.0
+!
+interface GigabitEthernet0/0/0/0
+ description connect between CR-01 and SE-5311
+ cdp
+ ipv4 address 10.53.111.1 255.255.255.254
+!
+interface GigabitEthernet0/0/0/1
+ description to CPE-01
+ cdp
+ vrf Customer_A
+ ipv4 address 192.168.1.1 255.255.255.0
+!
+router ospf 53
+ router-id 100.53.11.0
+ segment-routing mpls
+ segment-routing forwarding mpls
+ fast-reroute per-prefix
+ fast-reroute per-prefix ti-lfa enable
+ segment-routing sr-prefer
+ address-family ipv4 unicast
+ area 0
+  interface Loopback53
+   prefix-sid index 5311
+  !
+  interface GigabitEthernet0/0/0/0
+   fast-reroute per-prefix
+   fast-reroute per-prefix ti-lfa enable
+  !
+ !
+!
+router bgp 200
+ bgp router-id 100.53.11.0
+ bgp graceful-restart
+ address-family ipv4 unicast
+  additional-paths receive
+  additional-paths send
+ !
+ address-family vpnv4 unicast
+ !
+ address-family l2vpn evpn
+ !
+ neighbor-group Ring53-RR
+  remote-as 200
+  update-source Loopback53
+  address-family ipv4 labeled-unicast
+  !
+ !
+ neighbor 100.53.1.0
+  use neighbor-group Ring53-RR
+  description CR-01
+ !
+ neighbor 100.50.21.0
+  remote-as 200
+  update-source Loopback53
+  address-family vpnv4 unicast
+  !
+  address-family l2vpn evpn
+  !
+ !
+ vrf Customer_A
+  rd 200:100
+  address-family ipv4 unicast
+   redistribute connected
+  !
+ !
+!
+l2vpn
+ xconnect group evpn-vpws
+  p2p evpn1
+   interface GigabitEthernet0/0/0/1
+   neighbor evpn evi 100 target 50 source 50
+  !
+ !
+!
+segment-routing
+ global-block 16000 32000
+!
+ssh server v2
+ssh server vrf Mgmt-intf
+end</entry>
+        </extensions>
+        <interface id="0" name="GigabitEthernet0/0/0/0" ipv4="10.0.0.30" ipv6="2001:db8:a:0:1:1:0:1f" netPrefixLenV4="30" netPrefixLenV6="126"/>
+        <interface id="1" name="GigabitEthernet0/0/0/1" ipv4="10.0.0.26" ipv6="2001:db8:a:0:1:1:0:1b" netPrefixLenV4="30" netPrefixLenV6="126"/>
+    </node>
+    <node name="CR-01" type="SIMPLE" subtype="IOS XRv" location="173,237">
+        <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
+            <entry key="config" type="String">!! IOS XR Configuration 6.1.3
+!! Last configuration change at Tue Dec  5 21:41:00 2017 by cisco
+!
+!  IOS-XR Config generated on 2017-11-08 13:47
+! by autonetkit_0.23.5
+hostname CR-01
+service timestamps log datetime msec
+service timestamps debug datetime msec
+telnet vrf default ipv4 server max-servers 10
+telnet vrf Mgmt-intf ipv4 server max-servers 10
+domain name virl.info
+domain lookup disable
+cdp
+vrf Mgmt-intf
+ address-family ipv4 unicast
+ !
+ address-family ipv6 unicast
+ !
+!
+line template vty
+ timestamp
+ exec-timeout 720 0
+!
+line console
+ exec-timeout 0 0
+!
+line default
+ exec-timeout 720 0
+!
+vty-pool default 0 50
+control-plane
+ management-plane
+  inband
+   interface all
+    allow all
+   !
+  !
+ !
+!
+interface Loopback50
+ ipv4 address 100.50.1.0 255.255.255.255
+!
+interface Loopback53
+ ipv4 address 100.53.1.0 255.255.255.255
+!
+interface MgmtEth0/0/CPU0/0
+ description OOB Management
+ cdp
+ ! Configured on launch
+ vrf Mgmt-intf
+ ipv4 address 10.255.0.5 255.255.0.0
+!
+interface GigabitEthernet0/0/0/0
+ description connect between CR-01 and SE-5311
+ cdp
+ ipv4 address 10.53.111.0 255.255.255.254
+!
+interface GigabitEthernet0/0/0/1
+ description connect between CR-01 and CR-03
+ cdp
+ ipv4 address 10.50.31.0 255.255.255.254
+!
+interface GigabitEthernet0/0/0/2
+ description connect between CR-01 and CR-02
+ cdp
+ ipv4 address 10.50.21.0 255.255.255.254
+!
+route-policy ADDPATH
+  set path-selection backup 1 install multipath-protect advertise
+end-policy
+!
+route-policy ring53_loopbacks
+  if destination in (100.53.11.0/32, 100.53.1.0/32) then
+    pass
+  endif
+end-policy
+!
+router ospf ring50
+ router-id 100.50.1.0
+ segment-routing mpls
+ segment-routing forwarding mpls
+ segment-routing sr-prefer
+ address-family ipv4 unicast
+ area 0
+  interface Loopback50
+   passive enable
+   prefix-sid index 5001
+  !
+  interface GigabitEthernet0/0/0/1
+   fast-reroute per-prefix
+   fast-reroute per-prefix ti-lfa enable
+  !
+  interface GigabitEthernet0/0/0/2
+   fast-reroute per-prefix
+   fast-reroute per-prefix ti-lfa enable
+  !
+ !
+!
+router ospf ring53
+ router-id 100.53.1.0
+ segment-routing mpls
+ segment-routing forwarding mpls
+ fast-reroute per-prefix
+ fast-reroute per-prefix ti-lfa enable
+ segment-routing sr-prefer
+ address-family ipv4 unicast
+ area 0
+  interface Loopback53
+   passive enable
+   prefix-sid index 5301
+  !
+  interface GigabitEthernet0/0/0/0
+   fast-reroute per-prefix
+   fast-reroute per-prefix ti-lfa enable
+  !
+ !
+!
+router bgp 200
+ nsr
+ bgp router-id 100.50.1.0
+ bgp cluster-id 50
+ bgp graceful-restart
+ ibgp policy out enforce-modifications
+ address-family ipv4 unicast
+  additional-paths receive
+  additional-paths send
+  additional-paths selection route-policy ADDPATH
+  redistribute ospf ring53 route-policy ring53_loopbacks
+  allocate-label all
+ !
+ address-family link-state link-state
+ !
+ neighbor-group TvRR
+  remote-as 200
+  update-source Loopback50
+  address-family ipv4 labeled-unicast
+   maximum-prefix 100000 75
+   next-hop-self
+  !
+ !
+ neighbor-group Ring53-RRC
+  remote-as 200
+  update-source Loopback53
+  address-family ipv4 labeled-unicast
+   route-reflector-client
+   maximum-prefix 100000 75
+   next-hop-self
+  !
+ !
+ neighbor 100.50.11.0
+  use neighbor-group TvRR
+  description Trasnport vRR1
+ !
+ neighbor 100.53.11.0
+  use neighbor-group Ring53-RRC
+  description SE-5311
+ !
+!
+segment-routing
+ global-block 16000 32000
+!
+ssh server v2
+ssh server vrf Mgmt-intf
+end</entry>
+        </extensions>
+        <interface id="0" name="GigabitEthernet0/0/0/0" ipv4="10.0.0.29" ipv6="2001:db8:a:0:1:1:0:1e" netPrefixLenV4="30" netPrefixLenV6="126"/>
+        <interface id="1" name="GigabitEthernet0/0/0/1" ipv4="10.0.0.9" ipv6="2001:db8:a:0:1:1:0:a" netPrefixLenV4="30" netPrefixLenV6="126"/>
+        <interface id="2" name="GigabitEthernet0/0/0/2" ipv4="10.0.0.5" ipv6="2001:db8:a:0:1:1:0:6" netPrefixLenV4="30" netPrefixLenV6="126"/>
+    </node>
+    <node name="CR-03" type="SIMPLE" subtype="IOS XRv" location="273,153">
+        <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
+            <entry key="config" type="String">!! IOS XR Configuration 6.1.3
+!! Last configuration change at Tue Dec  5 21:38:17 2017 by cisco
+!
+!  IOS-XR Config generated on 2017-11-08 13:47
+! by autonetkit_0.23.5
+hostname CR-03
+service timestamps log datetime msec
+service timestamps debug datetime msec
+telnet vrf default ipv4 server max-servers 10
+telnet vrf Mgmt-intf ipv4 server max-servers 10
+domain name virl.info
+domain lookup disable
+cdp
+vrf Mgmt-intf
+ address-family ipv4 unicast
+ !
+ address-family ipv6 unicast
+ !
+!
+line template vty
+ timestamp
+ exec-timeout 720 0
+!
+line console
+ exec-timeout 0 0
+!
+line default
+ exec-timeout 720 0
+!
+vty-pool default 0 50
+control-plane
+ management-plane
+  inband
+   interface all
+    allow all
+   !
+  !
+ !
+!
+interface Loopback50
+ ipv4 address 100.50.3.0 255.255.255.255
+!
+interface MgmtEth0/0/CPU0/0
+ description OOB Management
+ cdp
+ ! Configured on launch
+ vrf Mgmt-intf
+ ipv4 address 10.255.0.7 255.255.0.0
+!
+interface GigabitEthernet0/0/0/0
+ description connect between CR-01 and CR-03
+ cdp
+ ipv4 address 10.50.31.1 255.255.255.254
+!
+interface GigabitEthernet0/0/0/1
+ description connect between CR-02 and CR-03
+ cdp
+ ipv4 address 10.50.32.1 255.255.255.254
+!
+interface GigabitEthernet0/0/0/2
+ description connect between CR-03 and T-RR-01
+ cdp
+ ipv4 address 10.50.131.1 255.255.255.254
+!
+interface GigabitEthernet0/0/0/3
+ description connect between CR-03 and S-RR-01
+ cdp
+ ipv4 address 10.50.231.1 255.255.255.254
+!
+route-policy ADDPATH
+  set path-selection backup 1 install multipath-protect advertise
+end-policy
+!
+router ospf ring50
+ router-id 100.50.3.0
+ segment-routing mpls
+ segment-routing forwarding mpls
+ segment-routing sr-prefer
+ address-family ipv4 unicast
+ area 0
+  interface Loopback50
+   passive enable
+   prefix-sid index 5003
+  !
+  interface GigabitEthernet0/0/0/0
+   fast-reroute per-prefix
+   fast-reroute per-prefix ti-lfa enable
+  !
+  interface GigabitEthernet0/0/0/1
+   fast-reroute per-prefix
+   fast-reroute per-prefix ti-lfa enable
+  !
+  interface GigabitEthernet0/0/0/2
+   fast-reroute per-prefix
+   fast-reroute per-prefix ti-lfa enable
+  !
+  interface GigabitEthernet0/0/0/3
+   fast-reroute per-prefix
+   fast-reroute per-prefix ti-lfa enable
+  !
+ !
+!
+segment-routing
+ global-block 16000 32000
+!
+ssh server v2
+ssh server vrf Mgmt-intf
+end</entry>
+        </extensions>
+        <interface id="0" name="GigabitEthernet0/0/0/0" ipv4="10.0.0.10" ipv6="2001:db8:a:0:1:1:0:b" netPrefixLenV4="30" netPrefixLenV6="126"/>
+        <interface id="1" name="GigabitEthernet0/0/0/1" ipv4="10.0.0.22" ipv6="2001:db8:a:0:1:1:0:17" netPrefixLenV4="30" netPrefixLenV6="126"/>
+        <interface id="2" name="GigabitEthernet0/0/0/2" ipv4="10.0.0.13" ipv6="2001:db8:a:0:1:1:0:f" netPrefixLenV4="30" netPrefixLenV6="126"/>
+        <interface id="3" name="GigabitEthernet0/0/0/3" ipv4="10.0.0.17" ipv6="2001:db8:a:0:1:1:0:13" netPrefixLenV4="30" netPrefixLenV6="126"/>
+    </node>
+    <node name="CR-02" type="SIMPLE" subtype="IOS XRv" location="333,246">
+        <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
+            <entry key="config" type="String">!! IOS XR Configuration 6.1.3
+!! Last configuration change at Tue Dec  5 21:42:13 2017 by cisco
+!
+!  IOS-XR Config generated on 2017-11-08 13:47
+! by autonetkit_0.23.5
+hostname CR-02
+service timestamps log datetime msec
+service timestamps debug datetime msec
+telnet vrf default ipv4 server max-servers 10
+telnet vrf Mgmt-intf ipv4 server max-servers 10
+domain name virl.info
+domain lookup disable
+cdp
+vrf Mgmt-intf
+ address-family ipv4 unicast
+ !
+ address-family ipv6 unicast
+ !
+!
+line template vty
+ timestamp
+ exec-timeout 720 0
+!
+line console
+ exec-timeout 0 0
+!
+line default
+ exec-timeout 720 0
+!
+vty-pool default 0 50
+control-plane
+ management-plane
+  inband
+   interface all
+    allow all
+   !
+  !
+ !
+!
+!exit
+interface Loopback50
+ ipv4 address 100.50.2.0 255.255.255.255
+!
+interface Loopback56
+ ipv4 address 100.56.2.0 255.255.255.255
+!
+interface MgmtEth0/0/CPU0/0
+ description OOB Management
+ cdp
+ ! Configured on launch
+ vrf Mgmt-intf
+ ipv4 address 10.255.0.6 255.255.0.0
+!
+interface GigabitEthernet0/0/0/0
+ description connect between CR-02 and CR-03
+ cdp
+ ipv4 address 10.50.32.0 255.255.255.254
+!
+interface GigabitEthernet0/0/0/1
+ description connect between CR-01 and CR-02
+ cdp
+ ipv4 address 10.50.21.1 255.255.255.254
+!
+interface GigabitEthernet0/0/0/2
+ description connect between CR-02 and SE-5611
+ cdp
+ ipv4 address 10.56.111.0 255.255.255.254
+!
+route-policy ADDPATH
+  set path-selection backup 1 install multipath-protect advertise
+end-policy
+!
+route-policy ring56_loopbacks
+  if destination in (100.56.11.0/32, 100.56.2.0/32) then
+    pass
+  endif
+end-policy
+!
+router ospf ring50
+ router-id 100.50.2.0
+ segment-routing mpls
+ segment-routing forwarding mpls
+ segment-routing sr-prefer
+ address-family ipv4 unicast
+ area 0
+  interface Loopback50
+   passive enable
+   prefix-sid index 5002
+  !
+  interface GigabitEthernet0/0/0/0
+   fast-reroute per-prefix
+   fast-reroute per-prefix ti-lfa enable
+  !
+  interface GigabitEthernet0/0/0/1
+   fast-reroute per-prefix
+   fast-reroute per-prefix ti-lfa enable
+  !
+ !
+!
+router ospf ring56
+ router-id 100.56.2.0
+ segment-routing mpls
+ segment-routing forwarding mpls
+ fast-reroute per-prefix
+ fast-reroute per-prefix ti-lfa enable
+ segment-routing sr-prefer
+ address-family ipv4 unicast
+ area 0
+  interface Loopback56
+   passive enable
+   prefix-sid index 5602
+  !
+  interface GigabitEthernet0/0/0/2
+   fast-reroute per-prefix
+   fast-reroute per-prefix ti-lfa enable
+  !
+ !
+!
+router bgp 200
+ nsr
+ bgp router-id 100.50.2.0
+ bgp cluster-id 50
+ bgp graceful-restart
+ ibgp policy out enforce-modifications
+ address-family ipv4 unicast
+  additional-paths receive
+  additional-paths send
+  additional-paths selection route-policy ADDPATH
+  redistribute ospf ring56 route-policy ring56_loopbacks
+  allocate-label all
+ !
+ address-family link-state link-state
+ !
+ neighbor-group TvRR
+  remote-as 200
+  update-source Loopback50
+  address-family ipv4 labeled-unicast
+   maximum-prefix 100000 75
+   next-hop-self
+  !
+ !
+ neighbor-group Ring56-RRC
+  remote-as 200
+  update-source Loopback56
+  address-family ipv4 labeled-unicast
+   route-reflector-client
+   maximum-prefix 100000 75
+   next-hop-self
+  !
+ !
+ neighbor 100.50.11.0
+  use neighbor-group TvRR
+  description Trasnport vRR1
+ !
+ neighbor 100.56.11.0
+  use neighbor-group Ring56-RRC
+  description SE-5611
+ !
+!
+segment-routing
+ global-block 16000 32000
+!
+ssh server v2
+ssh server vrf Mgmt-intf
+end</entry>
+        </extensions>
+        <interface id="0" name="GigabitEthernet0/0/0/0" ipv4="10.0.0.21" ipv6="2001:db8:a:0:1:1:0:16" netPrefixLenV4="30" netPrefixLenV6="126"/>
+        <interface id="1" name="GigabitEthernet0/0/0/1" ipv4="10.0.0.6" ipv6="2001:db8:a:0:1:1:0:7" netPrefixLenV4="30" netPrefixLenV6="126"/>
+        <interface id="2" name="GigabitEthernet0/0/0/2" ipv4="10.0.0.37" ipv6="2001:db8:a:0:1:1:0:26" netPrefixLenV4="30" netPrefixLenV6="126"/>
+    </node>
+    <node name="SE-5611" type="SIMPLE" subtype="IOS XRv" location="450,238">
+        <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
+            <entry key="config" type="String">!! IOS XR Configuration 6.1.3
+!! Last configuration change at Tue Dec  5 21:46:45 2017 by cisco
+!
+!  IOS-XR Config generated on 2017-11-08 13:47
+! by autonetkit_0.23.5
+hostname SE-5611
+service timestamps log datetime msec
+service timestamps debug datetime msec
+telnet vrf default ipv4 server max-servers 10
+telnet vrf Mgmt-intf ipv4 server max-servers 10
+domain name virl.info
+domain lookup disable
+cdp
+vrf Mgmt-intf
+ address-family ipv4 unicast
+ !
+ address-family ipv6 unicast
+ !
+!
+vrf Customer_A
+ address-family ipv4 unicast
+  import route-target
+   200:100
+  !
+  export route-target
+   200:100
+  !
+ !
+!
+line template vty
+ timestamp
+ exec-timeout 720 0
+!
+line console
+ exec-timeout 0 0
+!
+line default
+ exec-timeout 720 0
+!
+vty-pool default 0 50
+control-plane
+ management-plane
+  inband
+   interface all
+    allow all
+   !
+  !
+ !
+!
+interface Loopback56
+ ipv4 address 100.56.11.0 255.255.255.255
+!
+interface Loopback200
+ vrf Customer_A
+ ipv4 address 192.168.200.1 255.255.255.0
+!
+interface MgmtEth0/0/CPU0/0
+ description OOB Management
+ cdp
+ ! Configured on launch
+ vrf Mgmt-intf
+ ipv4 address 10.255.0.10 255.255.0.0
+!
+interface GigabitEthernet0/0/0/0
+ description connect between CR-02 and SE-5611
+ cdp
+ ipv4 address 10.56.111.1 255.255.255.254
+!
+interface GigabitEthernet0/0/0/1
+ description to CPE-02
+ cdp
+ vrf Customer_A
+ ipv4 address 192.168.2.1 255.255.255.0
+!
+router ospf 56
+ router-id 100.56.11.0
+ segment-routing mpls
+ segment-routing forwarding mpls
+ fast-reroute per-prefix
+ fast-reroute per-prefix ti-lfa enable
+ segment-routing sr-prefer
+ address-family ipv4 unicast
+ area 0
+  interface Loopback56
+   prefix-sid index 5611
+  !
+  interface GigabitEthernet0/0/0/0
+   fast-reroute per-prefix
+   fast-reroute per-prefix ti-lfa enable
+  !
+ !
+!
+router bgp 200
+ bgp router-id 100.56.11.0
+ bgp graceful-restart
+ address-family ipv4 unicast
+  additional-paths receive
+  additional-paths send
+ !
+ address-family vpnv4 unicast
+ !
+ address-family l2vpn evpn
+ !
+ neighbor-group Ring56-RR
+  remote-as 200
+  update-source Loopback56
+  address-family ipv4 labeled-unicast
+  !
+ !
+ neighbor 100.56.2.0
+  use neighbor-group Ring56-RR
+  description CR-02
+ !
+ neighbor 100.50.21.0
+  remote-as 200
+  update-source Loopback56
+  address-family vpnv4 unicast
+  !
+  address-family l2vpn evpn
+  !
+ !
+ vrf Customer_A
+  rd 200:100
+  address-family ipv4 unicast
+   redistribute connected
+  !
+ !
+!
+l2vpn
+ xconnect group evpn-vpws
+  p2p evpn1
+   interface GigabitEthernet0/0/0/1
+   neighbor evpn evi 100 target 50 source 50
+  !
+ !
+!
+segment-routing
+ global-block 16000 32000
+!
+ssh server v2
+ssh server vrf Mgmt-intf
+end</entry>
+        </extensions>
+        <interface id="0" name="GigabitEthernet0/0/0/0" ipv4="10.0.0.38" ipv6="2001:db8:a:0:1:1:0:27" netPrefixLenV4="30" netPrefixLenV6="126"/>
+        <interface id="1" name="GigabitEthernet0/0/0/1" ipv4="10.0.0.34" ipv6="2001:db8:a:0:1:1:0:23" netPrefixLenV4="30" netPrefixLenV6="126"/>
+    </node>
+    <node name="T-RR-01" type="SIMPLE" subtype="IOS XRv" location="187,62">
+        <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
+            <entry key="config" type="String">!! IOS XR Configuration 6.1.3
+!! Last configuration change at Tue Dec  5 22:19:13 2017 by cisco
+!
+!  IOS-XR Config generated on 2017-11-08 13:47
+! by autonetkit_0.23.5
+hostname TvRR-01
+service timestamps log datetime msec
+service timestamps debug datetime msec
+telnet vrf default ipv4 server max-servers 10
+telnet vrf Mgmt-intf ipv4 server max-servers 10
+domain name virl.info
+domain lookup disable
+cdp
+vrf Mgmt-intf
+ address-family ipv4 unicast
+ !
+ address-family ipv6 unicast
+ !
+!
+line template vty
+ timestamp
+ exec-timeout 720 0
+!
+line console
+ exec-timeout 0 0
+!
+line default
+ exec-timeout 720 0
+!
+vty-pool default 0 50
+control-plane
+ management-plane
+  inband
+   interface all
+    allow all
+   !
+  !
+ !
+!
+interface Loopback50
+ ipv4 address 100.50.11.0 255.255.255.255
+!
+interface MgmtEth0/0/CPU0/0
+ description OOB Management
+ cdp
+ ! Configured on launch
+ vrf Mgmt-intf
+ ipv4 address 10.255.0.11 255.255.0.0
+!
+interface GigabitEthernet0/0/0/0
+ description onnect between CR-03 and TvRR-01
+ cdp
+ ipv4 address 10.50.131.0 255.255.255.254
+!
+route-policy ADDPATH
+  set path-selection all advertise
+end-policy
+!
+router ospf ring50
+ log adjacency changes detail
+ router-id 100.50.11.0
+ segment-routing mpls
+ segment-routing forwarding mpls
+ segment-routing sr-prefer
+ address-family ipv4 unicast
+ area 0
+  interface Loopback50
+   passive enable
+   prefix-sid index 5011
+  !
+  interface GigabitEthernet0/0/0/0
+   fast-reroute per-prefix
+   fast-reroute per-prefix ti-lfa enable
+  !
+ !
+!
+router bgp 200
+ nsr
+ bgp router-id 100.50.11.0
+ bgp graceful-restart
+ address-family ipv4 unicast
+  additional-paths receive
+  additional-paths send
+  additional-paths selection route-policy ADDPATH
+  allocate-label all
+ !
+ neighbor-group T-RR-Client
+  remote-as 200
+  update-source Loopback50
+  address-family ipv4 labeled-unicast
+   multipath
+   route-reflector-client
+   maximum-prefix 100000 75
+  !
+ !
+ neighbor 100.50.1.0
+  use neighbor-group T-RR-Client
+  description CR-01
+ !
+ neighbor 100.50.2.0
+  use neighbor-group T-RR-Client
+  description CR-02
+ !
+ neighbor 100.50.21.0
+  use neighbor-group T-RR-Client
+  description S-RR-01
+ !
+!
+segment-routing
+ global-block 16000 23999
+!
+ssh server v2
+ssh server vrf Mgmt-intf
+end</entry>
+        </extensions>
+        <interface id="0" name="GigabitEthernet0/0/0/0" ipv4="10.0.0.14" ipv6="2001:db8:a:0:1:1:0:e" netPrefixLenV4="30" netPrefixLenV6="126"/>
+    </node>
+    <node name="S-RR-01" type="SIMPLE" subtype="IOS XRv" location="330,64">
+        <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
+            <entry key="config" type="String">!! IOS XR Configuration 6.1.3
+!! Last configuration change at Tue Dec  5 22:22:47 2017 by cisco
+!
+!  IOS-XR Config generated on 2017-11-08 13:47
+! by autonetkit_0.23.5
+hostname SvRR-01
+service timestamps log datetime msec
+service timestamps debug datetime msec
+telnet vrf default ipv4 server max-servers 10
+telnet vrf Mgmt-intf ipv4 server max-servers 10
+domain name virl.info
+domain lookup disable
+cdp
+vrf Mgmt-intf
+ address-family ipv4 unicast
+ !
+ address-family ipv6 unicast
+ !
+!
+line template vty
+ timestamp
+ exec-timeout 720 0
+!
+line console
+ exec-timeout 0 0
+!
+line default
+ exec-timeout 720 0
+!
+vty-pool default 0 50
+control-plane
+ management-plane
+  inband
+   interface all
+    allow all
+   !
+  !
+ !
+!
+interface Loopback50
+ ipv4 address 100.50.21.0 255.255.255.255
+!
+interface MgmtEth0/0/CPU0/0
+ description OOB Management
+ cdp
+ ! Configured on launch
+ vrf Mgmt-intf
+ ipv4 address 10.255.0.8 255.255.0.0
+!
+interface GigabitEthernet0/0/0/0
+ description onnect between CR-03 and SvRR-01
+ cdp
+ ipv4 address 10.50.231.0 255.255.255.254
+!
+route-policy ADDPATH
+  set path-selection all advertise
+end-policy
+!
+route-policy SET-SID($SID)
+  set label-index $SID
+end-policy
+!
+router ospf ring50
+ log adjacency changes detail
+ router-id 100.50.21.0
+ segment-routing mpls
+ segment-routing forwarding mpls
+ segment-routing sr-prefer
+ address-family ipv4 unicast
+ area 0
+  interface Loopback50
+   passive enable
+   prefix-sid index 5021
+  !
+  interface GigabitEthernet0/0/0/0
+   bfd multiplier 3
+   fast-reroute per-prefix
+   fast-reroute per-prefix ti-lfa enable
+  !
+ !
+!
+router bgp 200
+ nsr
+ bgp router-id 100.50.21.0
+ bgp graceful-restart
+ ibgp policy out enforce-modifications
+ address-family ipv4 unicast
+  additional-paths receive
+  additional-paths send
+  additional-paths selection route-policy ADDPATH
+  network 100.50.21.0/32 route-policy SET-SID(5021)
+  allocate-label all
+ !
+ address-family vpnv4 unicast
+  retain route-target all
+ !
+ address-family l2vpn evpn
+  retain route-target all
+ !
+ neighbor-group T-RR
+  remote-as 200
+  update-source Loopback50
+  address-family ipv4 labeled-unicast
+   maximum-prefix 100000 75
+   next-hop-self
+  !
+ !
+ neighbor-group S-RR-Client
+  remote-as 200
+  update-source Loopback50
+  address-family vpnv4 unicast
+   route-reflector-client
+  !
+  address-family l2vpn evpn
+   route-reflector-client
+  !
+ !
+ neighbor 100.50.11.0
+  use neighbor-group T-RR
+  description T-RR-01
+ !
+ neighbor 100.53.11.0
+  use neighbor-group S-RR-Client
+  description SE-5311
+ !
+ neighbor 100.56.11.0
+  use neighbor-group S-RR-Client
+  description SE-5611
+ !
+!
+segment-routing
+ global-block 16000 32000
+!
+ssh server v2
+ssh server vrf Mgmt-intf
+end</entry>
+        </extensions>
+        <interface id="0" name="GigabitEthernet0/0/0/0" ipv4="10.0.0.18" ipv6="2001:db8:a:0:1:1:0:12" netPrefixLenV4="30" netPrefixLenV6="126"/>
+    </node>
+    <node name="CPE-01" type="SIMPLE" subtype="IOSv" location="32,142">
+        <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
+            <entry key="config" type="String">!
+! Last configuration change at 19:34:40 UTC Tue Dec 5 2017
+!
+version 15.6
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname CPE-01
+!
+boot-start-marker
+boot-end-marker
+!
+!
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+enable password cisco
+!
+no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name virl.info
+ip cef
+ipv6 unicast-routing
+ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+username cisco privilege 15 secret 5 $1$KHMJ$XKslVGH8rzbiQaq5Z2htv1
+!
+redundancy
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ description OOB Management
+ vrf forwarding Mgmt-intf
+ ip address 10.255.0.3 255.255.0.0
+ duplex full
+ speed auto
+ media-type rj45
+!
+interface GigabitEthernet0/1
+ ip address 192.168.1.2 255.255.255.0
+ duplex full
+ speed auto
+ media-type rj45
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+ip route 0.0.0.0 0.0.0.0 192.168.1.1
+ip ssh server algorithm authentication password
+!
+!
+!
+!
+control-plane
+!
+banner exec `
+**************************************************************************
+* IOSv - Cisco Systems Confidential                                      *
+*                                                                        *
+* Supplemental End User License Restrictions                             *
+*                                                                        *
+* This IOSv software is provided AS-IS without warranty of any kind.     *
+* Under no circumstances may this software be used separate from         *
+* the Cisco Modeling Labs Software that this software was provided       *
+*  with, or deployed or used as part of a production environment.        *
+*                                                                        *
+* By using the software, you agree to abide by the terms and             *
+* conditions of the Cisco End User License Agreement at                  *
+* http://www.cisco.com/go/eula.                                          *
+*                                                                        *
+* Unauthorized use or distribution of this software is expressly         *
+* prohibited.                                                            *
+**************************************************************************
+`
+banner incoming `
+**************************************************************************
+* IOSv - Cisco Systems Confidential                                      *
+*                                                                        *
+* Supplemental End User License Restrictions                             *
+*                                                                        *
+* This IOSv software is provided AS-IS without warranty of any kind.     *
+* Under no circumstances may this software be used separate from         *
+* the Cisco Modeling Labs Software that this software was provided       *
+*  with, or deployed or used as part of a production environment.        *
+*                                                                        *
+* By using the software, you agree to abide by the terms and             *
+* conditions of the Cisco End User License Agreement at                  *
+* http://www.cisco.com/go/eula.                                          *
+*                                                                        *
+* Unauthorized use or distribution of this software is expressly         *
+* prohibited.                                                            *
+**************************************************************************
+`
+banner login `
+**************************************************************************
+* IOSv - Cisco Systems Confidential                                      *
+*                                                                        *
+* Supplemental End User License Restrictions                             *
+*                                                                        *
+* This IOSv software is provided AS-IS without warranty of any kind.     *
+* Under no circumstances may this software be used separate from         *
+* the Cisco Modeling Labs Software that this software was provided       *
+*  with, or deployed or used as part of a production environment.        *
+*                                                                        *
+* By using the software, you agree to abide by the terms and             *
+* conditions of the Cisco End User License Agreement at                  *
+* http://www.cisco.com/go/eula.                                          *
+*                                                                        *
+* Unauthorized use or distribution of this software is expressly         *
+* prohibited.                                                            *
+**************************************************************************
+`
+!
+line con 0
+ password cisco
+line aux 0
+line vty 0 4
+ exec-timeout 720 0
+ password cisco
+ login local
+ transport input telnet ssh
+!
+no scheduler allocate
+!
+end</entry>
+        </extensions>
+        <interface id="0" name="GigabitEthernet0/1" ipv4="10.0.0.25" ipv6="2001:db8:a:0:1:1:0:1a" netPrefixLenV4="30" netPrefixLenV6="126"/>
+    </node>
+    <node name="CPE-02" type="SIMPLE" subtype="IOSv" location="468,140">
+        <extensions>
+            <entry key="AutoNetkit.mgmt_ip" type="string"></entry>
+            <entry key="config" type="String">!
+! Last configuration change at 19:38:06 UTC Tue Dec 5 2017
+!
+version 15.6
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname CPE-02
+!
+boot-start-marker
+boot-end-marker
+!
+!
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+enable password cisco
+!
+no aaa new-model
+ethernet lmi ce
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name virl.info
+ip cef
+ipv6 unicast-routing
+ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+username cisco privilege 15 secret 5 $1$RC09$biJuD/J7PS9KtVPZp5Vl80
+!
+redundancy
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ description OOB Management
+ vrf forwarding Mgmt-intf
+ ip address 10.255.0.4 255.255.0.0
+ duplex full
+ speed auto
+ media-type rj45
+!
+interface GigabitEthernet0/1
+ ip address 192.168.2.2 255.255.255.0
+ duplex full
+ speed auto
+ media-type rj45
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+ip route 0.0.0.0 0.0.0.0 192.168.2.1
+ip ssh server algorithm authentication password
+!
+!
+!
+!
+control-plane
+!
+banner exec `
+**************************************************************************
+* IOSv - Cisco Systems Confidential                                      *
+*                                                                        *
+* Supplemental End User License Restrictions                             *
+*                                                                        *
+* This IOSv software is provided AS-IS without warranty of any kind.     *
+* Under no circumstances may this software be used separate from         *
+* the Cisco Modeling Labs Software that this software was provided       *
+*  with, or deployed or used as part of a production environment.        *
+*                                                                        *
+* By using the software, you agree to abide by the terms and             *
+* conditions of the Cisco End User License Agreement at                  *
+* http://www.cisco.com/go/eula.                                          *
+*                                                                        *
+* Unauthorized use or distribution of this software is expressly         *
+* prohibited.                                                            *
+**************************************************************************
+`
+banner incoming `
+**************************************************************************
+* IOSv - Cisco Systems Confidential                                      *
+*                                                                        *
+* Supplemental End User License Restrictions                             *
+*                                                                        *
+* This IOSv software is provided AS-IS without warranty of any kind.     *
+* Under no circumstances may this software be used separate from         *
+* the Cisco Modeling Labs Software that this software was provided       *
+*  with, or deployed or used as part of a production environment.        *
+*                                                                        *
+* By using the software, you agree to abide by the terms and             *
+* conditions of the Cisco End User License Agreement at                  *
+* http://www.cisco.com/go/eula.                                          *
+*                                                                        *
+* Unauthorized use or distribution of this software is expressly         *
+* prohibited.                                                            *
+**************************************************************************
+`
+banner login `
+**************************************************************************
+* IOSv - Cisco Systems Confidential                                      *
+*                                                                        *
+* Supplemental End User License Restrictions                             *
+*                                                                        *
+* This IOSv software is provided AS-IS without warranty of any kind.     *
+* Under no circumstances may this software be used separate from         *
+* the Cisco Modeling Labs Software that this software was provided       *
+*  with, or deployed or used as part of a production environment.        *
+*                                                                        *
+* By using the software, you agree to abide by the terms and             *
+* conditions of the Cisco End User License Agreement at                  *
+* http://www.cisco.com/go/eula.                                          *
+*                                                                        *
+* Unauthorized use or distribution of this software is expressly         *
+* prohibited.                                                            *
+**************************************************************************
+`
+!
+line con 0
+ password cisco
+line aux 0
+line vty 0 4
+ exec-timeout 720 0
+ password cisco
+ login local
+ transport input telnet ssh
+!
+no scheduler allocate
+!
+end</entry>
+        </extensions>
+        <interface id="0" name="GigabitEthernet0/1" ipv4="10.0.0.33" ipv6="2001:db8:a:0:1:1:0:22" netPrefixLenV4="30" netPrefixLenV6="126"/>
+    </node>
+    <annotations/>
+    <connection dst="/virl:topology/virl:node[2]/virl:interface[1]" src="/virl:topology/virl:node[1]/virl:interface[1]"/>
+    <connection dst="/virl:topology/virl:node[3]/virl:interface[1]" src="/virl:topology/virl:node[2]/virl:interface[2]"/>
+    <connection dst="/virl:topology/virl:node[4]/virl:interface[1]" src="/virl:topology/virl:node[3]/virl:interface[2]"/>
+    <connection dst="/virl:topology/virl:node[2]/virl:interface[3]" src="/virl:topology/virl:node[4]/virl:interface[2]"/>
+    <connection dst="/virl:topology/virl:node[3]/virl:interface[3]" src="/virl:topology/virl:node[6]/virl:interface[1]"/>
+    <connection dst="/virl:topology/virl:node[3]/virl:interface[4]" src="/virl:topology/virl:node[7]/virl:interface[1]"/>
+    <connection dst="/virl:topology/virl:node[5]/virl:interface[1]" src="/virl:topology/virl:node[4]/virl:interface[3]"/>
+    <connection dst="/virl:topology/virl:node[1]/virl:interface[2]" src="/virl:topology/virl:node[8]/virl:interface[1]"/>
+    <connection dst="/virl:topology/virl:node[5]/virl:interface[2]" src="/virl:topology/virl:node[9]/virl:interface[1]"/>
+</topology>

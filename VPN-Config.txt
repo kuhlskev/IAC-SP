@@ -1,0 +1,78 @@
+**** 5311 baseline VPN config ******
+
+
+router bgp 200
+!
+address-family vpnv4 unicast
+!
+neighbor 100.50.21.0
+ address-family vpnv4 unicast
+
+
+**** 5611 baseline VPN config ******
+
+
+router bgp 200
+!
+address-family vpnv4 unicast
+!
+neighbor 100.50.21.0
+ address-family vpnv4 unicast
+
+
+
+**** 5311 customer VPN config ******
+
+vrf Customer_A
+ address-family ipv4 unicast
+  import route-target
+   200:100
+  !
+  export route-target
+   200:100
+  !
+!
+!
+interface GigabitEthernet0/0/0/1
+ description to CPE-01
+ vrf Customer_A
+ ipv4 address 192.168.1.1 255.255.255.0
+!
+!
+router bgp 200
+ vrf Customer_A
+  rd 200:100
+  address-family ipv4 unicast
+   redistribute connected
+  !
+
+
+**** 5611 customer VPN config ******
+
+vrf Customer_A
+ address-family ipv4 unicast
+  import route-target
+   200:100
+  !
+  export route-target
+   200:100
+  !
+!
+!
+!
+interface GigabitEthernet0/0/0/1
+ description to CPE-02
+ vrf Customer_A
+ ipv4 address 192.168.2.1 255.255.255.0
+!
+!
+router bgp 200
+ vrf Customer_A
+  rd 200:100
+  address-family ipv4 unicast
+   redistribute connected
+  !
+!
+
+
+

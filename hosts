@@ -1,0 +1,22 @@
+[all:vars]
+ansible_connection = local
+username = admin
+password = admin
+transport = ssh
+
+[PE]
+PE-01
+PE-02
+
+[SE]
+SE-5311
+SE-5611
+
+[RR]
+T-RR-01
+S-RR-01
+
+[Core]
+CR-01
+CR-02
+CR-03
